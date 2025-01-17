@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Online Behavioral Experiment</title>
+    <!-- Include jsPsych library -->
+    <script src="https://unpkg.com/jspsych@7.3.0/jspsych.js"></script>
+    <link href="https://unpkg.com/jspsych@7.3.0/css/jspsych.css" rel="stylesheet" type="text/css" />
+    <!-- Include jsPsych plugins -->
+    <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-html-keyboard-response.js"></script>
+    <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-survey-likert.js"></script>
+    <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-survey-text.js"></script>
+    <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-canvas-shape.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .jspsych-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="jspsych-target"></div>
+    <script>
+        // jsPsych Experiment Code
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize jsPsych
+            const jsPsych = initJsPsych({
+                display_element: 'jspsych-target',
+                on_finish: function() {
+                    jsPsych.data.displayData();
+                },
+                auto_update_progress_bar: false,
+            });
+
+            // Define Surveys
+
+            // (A) Define SPQ Survey
+            const spq_items = [
+                "I can't get myself down to work hard enough.",
+                "I work in an unsystematic way.",
+                "I'm always behind with my work.",
+                "I continuously interrupt my work in order to do other things.",
+                "I don't care enough about my study.",
+                "I work by fits.",
+                "I miss a real incentive to work.",
+                "I can't stop thinking about my work, even when I try to relax.",
+                "When I start working on some task, I think that I won't be able to manage it.",
+                "At times, when studying, I feel struck by panic.",
+                "I often can't get to sleep because I have to think about my work.",
+                "I feel guilty when not working.",
+                "Often I feel too depressed to concentrate adequately on my work.",
+                "I fear being seized by panic during examinations.",
+                "I often think that people know more than I do.",
+                "I'm afraid all my weak points will show up at examinations.",
+                "Certain aspects of my study are really interesting.",
+                "I like to talk about my study with other people.",
+                "I often think that a different study is more interesting than mine.",
+                "My interest in my study is growing all the time."
+            ];
+
+            const spq_survey = spq_items.map((item, index) => {
+                return {
+                    prompt: item,
+                    name: `SPQ_Item${index + 1}`,
+                    labels: [
+                        "1 (Strongly Disagree)",
+                        "2 (Disagree)",
+                        "3 (Neutral)",
+                        "4 (Agree)",
+                        "5 (Strongly Agree)"
+                    ],
+                    required: true,
+                    horizontal: true
+                };
+            });
+
+            // (A) Define SPSRQ-RC Survey
+            const spsrq_items = [
+                "Do you often refrain from doing something because you are afraid of it being illegal?",
+                "Does the good prospect of obtaining money motivate you strongly to do some things?",
+                "Do you prefer not to ask for something when you are not sure you will obtain it?",
+                "Are you frequently encouraged to act by the possibility of being valued in your work or with friends?",
+                "Are you often afraid of new or unexpected situations?",
+                "Do you often meet people you find physically attractive?",
+                "Is it difficult for you to telephone someone you do not know?",
+                "Do you like to take some drugs because of the pleasure you get from them?",
+                "Do you often renounce your rights to avoid quarrels with people?",
+                "Do you often do things to be praised?",
+                "As a child, were you troubled by punishments at home or in school?",
+                "Do you like being the center of attention at a party or social meeting?",
+                "In tasks that you are not prepared for, do you attach great importance to the possibility of failure?",
+                "Do you spend a lot of your time on obtaining a good image?",
+                "Are you easily discouraged in difficult situations?",
+                "Do you need people to show their affection for you all the time?",
+                "Are you a shy person?",
+                "When you are in a group, do you try to make your opinions the most intelligent or funniest?",
+                "Whenever possible, do you avoid demonstrating your skills for fear of being embarrassed?",
+                "Do you often take the opportunity to pick up people you find attractive?"
+            ];
+
+            const spsrq_survey = spsrq_items.map((item, index) => {
+                return {
+                    prompt: item,
+                    name: `SPSRQ_Item${index + 1}`,
+                    options: ['Yes', 'No'],
+                    required: true,
+                    horizontal: true
+                };
+            });
+
+            // (B) Define Post-Experiment Survey
+            const postExp_questions = [
+                {
+                    prompt: "How confident do you feel about your choices during the experiment?",
+                    name: "PostExp_Q1",
+                    labels: [
+                        "1 (Not confident)",
+                        "2",
+                        "3",
+                        "4",
+                        "5 (Very confident)"
+                    ],
+                    required: true,
+                    horizontal: true
+                },
+                {
+                    prompt: "Did you find any part of the experiment confusing?",
+                    name: "PostExp_Q2",
+                    placeholder: "Type your response here...",
+                    required: false
+                },
+                {
+                    prompt: "How enjoyable did you find the experiment?",
+                    name: "PostExp_Q3",
+                    labels: [
+                        "1 (Not enjoyable)",
+                        "2",
+                        "3",
+                        "4",
+                        "5 (Very enjoyable)"
+                    ],
+                    required: true,
+                    horizontal: true
+                },
+                {
+                    prompt: "Any additional comments or feedback?",
+                    name: "PostExp_Q4",
+                    placeholder: "Type your response here...",
+                    required: false
+                }
+            ];
+
+            // Utility Functions
+
+            // Function to capitalize first letter
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+
+            // Function to display messages
+            function create_message_trial(message, duration = null) {
+                const trial = {
+                    type: 'html-keyboard-response',
+                    stimulus: `<p>${message}</p>`,
+                    choices: duration ? jsPsych.NO_KEYS : [' '],
+                    trial_duration: duration ? duration * 1000 : null,
+                    on_finish: function(data){
+                        // No action needed
+                    }
+                };
+                return trial;
+            }
+
+            // Function to display shapes
+            function create_shape_trial(state, scoreboard_text) {
+                // Define shapes and colors
+                const state_shapes = {
+                    'A1': {shape: 'circle', color: 'white'},
+                    'X1': {shape: 'triangle', color: 'red'},
+                    'X2': {shape: 'triangle', color: 'yellow'},
+                    'X3': {shape: 'triangle', color: 'green'},
+                    'Y1': {shape: 'square', color: 'red'},
+                    'Y2': {shape: 'square', color: 'yellow'},
+                    'Y3': {shape: 'square', color: 'green'},
+                    'R1': {shape: 'star', color: 'yellow'},
+                    'R2': {shape: 'star', color: 'white'},
+                    'P1': {shape: 'star', color: 'yellow'},
+                    'P2': {shape: 'star', color: 'white'},
+                };
+
+                const shape_info = state_shapes[state] || {shape: 'circle', color: 'white'};
+                const shape_svg = get_shape_svg(shape_info.shape, shape_info.color);
+
+                const trial = {
+                    type: 'html-keyboard-response',
+                    stimulus: `
+                        <div style="position: relative; width: 100%; height: 100%;">
+                            <div style="position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%);">
+                                ${shape_svg}
+                            </div>
+                            <div style="position: absolute; bottom: 20%; width: 100%; text-align: center; color: white;">
+                                <p>${scoreboard_text}</p>
+                            </div>
+                            <div style="position: absolute; bottom: 10%; width: 100%; text-align: center; color: white;">
+                                <p>Press '1', '2', or '3'. Press 'esc' to quit.</p>
+                            </div>
+                        </div>
+                    `,
+                    choices: ['1', '2', '3', 'Escape'],
+                    data: {state: state},
+                    on_finish: function(data){
+                        // Data will be handled in the timeline's functions
+                    }
+                };
+                return trial;
+            }
+
+            // Function to get SVG of shape
+            function get_shape_svg(shape, color) {
+                let svg = '';
+                switch(shape) {
+                    case 'circle':
+                        svg = `<svg width="100" height="100">
+                                    <circle cx="50" cy="50" r="40" fill="${color}" />
+                               </svg>`;
+                        break;
+                    case 'triangle':
+                        svg = `<svg width="100" height="100">
+                                    <polygon points="50,10 90,90 10,90" fill="${color}" />
+                               </svg>`;
+                        break;
+                    case 'square':
+                        svg = `<svg width="100" height="100">
+                                    <rect x="10" y="10" width="80" height="80" fill="${color}" />
+                               </svg>`;
+                        break;
+                    case 'star':
+                        svg = `<svg width="100" height="100">
+                                    <polygon points="50,10 61,35 88,35 66,57 75,83 50,67 25,83 34,57 12,35 39,35" fill="${color}" />
+                               </svg>`;
+                        break;
+                    default:
+                        svg = `<svg width="100" height="100">
+                                    <circle cx="50" cy="50" r="40" fill="white" />
+                               </svg>`;
+                }
+                return svg;
+            }
+
+            // Function to display arrow response (left/right)
+            function create_arrow_response_trial(instruction, state, scoreboard_text) {
+                const trial = {
+                    type: 'html-keyboard-response',
+                    stimulus: `
+                        <div style="position: relative; width: 100%; height: 100%;">
+                            <div style="position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%);">
+                                ${get_shape_svg(state_shapes[state].shape, state_shapes[state].color)}
+                            </div>
+                            <div style="position: absolute; bottom: 20%; width: 100%; text-align: center; color: white;">
+                                <p>${scoreboard_text}</p>
+                            </div>
+                            <div style="position: absolute; bottom: 10%; width: 100%; text-align: center; color: white;">
+                                <p>${instruction}</p>
+                            </div>
+                        </div>
+                    `,
+                    choices: ['ArrowLeft', 'ArrowRight', 'Escape'],
+                    data: {state: state},
+                    on_finish: function(data){
+                        // Data handled in timeline functions
+                    }
+                };
+                return trial;
+            }
+
+            // Function to handle text input
+            function create_text_input_trial(question) {
+                const trial = {
+                    type: 'survey-text',
+                    questions: [
+                        {
+                            prompt: question,
+                            rows: 5,
+                            columns: 60,
+                            required: false
+                        }
+                    ],
+                    on_finish: function(data){
+                        // Data is already stored
+                    }
+                };
+                return trial;
+            }
+
+            // Define State Shapes (for arrow response trials)
+            const state_shapes = {
+                'A1': {shape: 'circle', color: 'white'},
+                'X1': {shape: 'triangle', color: 'red'},
+                'X2': {shape: 'triangle', color: 'yellow'},
+                'X3': {shape: 'triangle', color: 'green'},
+                'Y1': {shape: 'square', color: 'red'},
+                'Y2': {shape: 'square', color: 'yellow'},
+                'Y3': {shape: 'square', color: 'green'},
+                'R1': {shape: 'star', color: 'yellow'},
+                'R2': {shape: 'star', color: 'white'},
+                'P1': {shape: 'star', color: 'yellow'},
+                'P2': {shape: 'star', color: 'white'},
+            };
+
+            // Define Main Experiment Logic
+
+            // Initialize variables
+            const participant_id = Date.now(); // Unique ID based on timestamp
+            const num_sets = 1; // Adjust as needed
+            const num_trials_per_episode = 2; // Must match model
+            const episode_reward_values = [1, 3, 5];
+            const reversal_point = Math.floor(num_trials_per_episode / 2);
+            let total_reward = 0;
+
+            // Define reward and punishment probability maps
+            const reward_prob_map = {
+                'X1_left': [0.75, 0.25],
+                'X1_right': [0.75, 0.25],
+                'X2_left': [0.25, 0.75],
+                'X2_right': [0.25, 0.75],
+                'X3_left': [0.5, 0.5],
+                'X3_right': [0.5, 0.5],
+                'Y1_left': [0.75, 0.25],
+                'Y1_right': [0.75, 0.25],
+                'Y2_left': [0.25, 0.75],
+                'Y2_right': [0.25, 0.75],
+                'Y3_left': [0.5, 0.5],
+                'Y3_right': [0.5, 0.5],
+            };
+
+            const punishment_prob_map = {
+                'X1_left': [0.75, 0.25],
+                'X1_right': [0.75, 0.25],
+                'X2_left': [0.25, 0.75],
+                'X2_right': [0.25, 0.75],
+                'X3_left': [0.5, 0.5],
+                'X3_right': [0.5, 0.5],
+                'Y1_left': [0.75, 0.25],
+                'Y1_right': [0.75, 0.25],
+                'Y2_left': [0.25, 0.75],
+                'Y2_right': [0.25, 0.75],
+                'Y3_left': [0.5, 0.5],
+                'Y3_right': [0.5, 0.5],
+            };
+
+            // Phase 1 probabilities
+            const phase1_probs = {
+                '1': [0.75, 0.25],
+                '2': [0.25, 0.75],
+                '3': [0.5, 0.5]
+            };
+
+            // Define phases
+            const phase_list = [1, 2, 3];
+
+            // Define conditions per set
+            function get_conditions(set_num) {
+                if (set_num === 1) {
+                    return [
+                        {
+                            type: 'reward',
+                            probabilities: {
+                                '1': [0.75, 0.25],
+                                '2': [0.25, 0.75],
+                                '3': [0.5, 0.5]
+                            },
+                            probability_reversal: false
+                        },
+                        {
+                            type: 'punishment',
+                            probabilities: {
+                                '1': [0.75, 0.25],
+                                '2': [0.25, 0.75],
+                                '3': [0.5, 0.5]
+                            },
+                            probability_reversal: false
+                        },
+                    ];
+                } else {
+                    return [
+                        {
+                            type: 'punishment',
+                            probabilities: {
+                                '1': [0.75, 0.25],
+                                '2': [0.25, 0.75],
+                                '3': [0.5, 0.5]
+                            },
+                            probability_reversal: false
+                        },
+                        {
+                            type: 'reward',
+                            probabilities: {
+                                '1': [0.75, 0.25],
+                                '2': [0.25, 0.75],
+                                '3': [0.5, 0.5]
+                            },
+                            probability_reversal: false
+                        },
+                    ];
+                }
+            }
+
+            // Function to decide final transition
+            function final_transition(is_reward_condition, probs, reward_value) {
+                if (is_reward_condition) {
+                    const choices = ['R1', 'R2'];
+                    const selected = jsPsych.randomization.sampleWithReplacement(choices, probs)[0];
+                    const reward = selected === 'R1' ? reward_value : 0;
+                    return {chosen: selected, reward: reward};
+                } else {
+                    const choices = ['P1', 'P2'];
+                    const selected = jsPsych.randomization.sampleWithReplacement(choices, probs)[0];
+                    const reward = selected === 'P2' ? reward_value : 0;
+                    return {chosen: selected, reward: reward};
+                }
+            }
+
+            // Function to run a single level
+            function run_level(phase, condition, level_num, set_num, participant_id) {
+                const base_reward_value = episode_reward_values[level_num - 1];
+                const reward_value = condition.type === 'reward' ? base_reward_value : base_reward_value; // Adjust if needed
+                const is_reward_cond = condition.type === 'reward';
+
+                // Define stages
+                let stage = 1;
+
+                // Define timeline for this level
+                let timeline = [];
+
+                // Run exactly num_trials_per_episode steps in one "Level"
+                for (let episode_index = 0; episode_index < num_trials_per_episode; episode_index++) {
+                    if (episode_index === reversal_point) {
+                        condition.probability_reversal = !condition.probability_reversal;
+                    }
+
+                    let current_state = 'A1';
+
+                    // Stage 1: Action selection
+                    let action_instructions = "Choose your action by pressing '1', '2', or '3'. Press 'esc' to quit.";
+                    let scoreboard_text = `Set: ${set_num}, Phase: ${phase}, Condition: ${capitalize(condition.type)}, Level ${level_num}, Total Reward: ${total_reward}, Episode ${episode_index + 1}`;
+
+                    // Create shape trial
+                    timeline.push(create_shape_trial(current_state, scoreboard_text));
+
+                    // Add data handling after response
+                    timeline.push({
+                        type: 'call-function',
+                        func: function(data) {
+                            let response = data.response;
+                            if (response === 'Escape') {
+                                jsPsych.endExperiment("Experiment terminated by user.");
+                            }
+                            // Phase Logic
+                            if (phase === 1) {
+                                // Single-step transitions
+                                let prob = phase1_probs[response] || [0.5, 0.5];
+                                if (['1', '2'].includes(response) && condition.probability_reversal) {
+                                    prob = prob.slice().reverse();
+                                }
+                                let outcome = jsPsych.randomization.sampleWithReplacement([true, false], prob)[0];
+                                let step_reward, next_state;
+                                if (is_reward_cond) {
+                                    if (outcome) {
+                                        step_reward = reward_value;
+                                        next_state = 'R1';
+                                    } else {
+                                        step_reward = 0;
+                                        next_state = 'R2';
+                                    }
+                                } else {
+                                    // Punishment condition
+                                    if (outcome) {
+                                        step_reward = 0;
+                                        next_state = 'P1';
+                                    } else {
+                                        step_reward = reward_value;
+                                        next_state = 'P2';
+                                    }
+                                }
+
+                                // Log data
+                                jsPsych.data.addData('Set', set_num);
+                                jsPsych.data.addData('Participant', participant_id);
+                                jsPsych.data.addData('Phase', phase);
+                                jsPsych.data.addData('Condition_Type', condition.type);
+                                jsPsych.data.addData('Level', level_num);
+                                jsPsych.data.addData('Stage', stage);
+                                jsPsych.data.addData('State', current_state);
+                                jsPsych.data.addData('Action', response);
+                                jsPsych.data.addData('Next_State', next_state);
+                                jsPsych.data.addData('Reward', step_reward);
+                                jsPsych.data.addData('Probabilities', prob);
+                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                jsPsych.data.addData('Trial', episode_index + 1);
+                                jsPsych.data.addData('Episode', episode_index + 1);
+                                jsPsych.data.addData('Score', total_reward);
+                                jsPsych.data.addData('set_num', set_num);
+                                jsPsych.data.addData('participant_id', participant_id);
+                                jsPsych.data.addData('phase', phase);
+                                jsPsych.data.addData('condition_type', condition.type);
+                                jsPsych.data.addData('level_num', level_num);
+                                jsPsych.data.addData('stage', stage);
+                                jsPsych.data.addData('state', current_state);
+                                jsPsych.data.addData('action', response);
+                                jsPsych.data.addData('next_state', next_state);
+                                jsPsych.data.addData('reward', step_reward);
+                                jsPsych.data.addData('probabilities', prob);
+                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                jsPsych.data.addData('episode_index', episode_index + 1);
+                                jsPsych.data.addData('trial', episode_index + 1);
+                                stage += 1;
+
+                                total_reward += step_reward;
+
+                                // Display reward message if terminal state
+                                if (['R1', 'R2', 'P1', 'P2'].includes(next_state)) {
+                                    let reward_message = `You received a reward of ${step_reward} points!\nTotal Reward: ${total_reward}`;
+                                    timeline.push(create_message_trial(reward_message, 2));
+
+                                    // Add terminal state shape
+                                    timeline.push(create_shape_trial(next_state, `Total Reward: ${total_reward}`));
+                                }
+                            } else if (phase === 2) {
+                                // Two-step transitions (A1 -> X -> Terminal)
+                                // Stage 1: A1 -> X
+                                let next_state = '';
+                                let prob = [];
+                                if (response === '1') {
+                                    next_state = 'X1';
+                                } else if (response === '2') {
+                                    next_state = 'X2';
+                                } else if (response === '3') {
+                                    next_state = 'X3';
+                                } else {
+                                    next_state = 'X3'; // Default
+                                }
+
+                                // Log first transition
+                                jsPsych.data.addData('Set', set_num);
+                                jsPsych.data.addData('Participant', participant_id);
+                                jsPsych.data.addData('Phase', phase);
+                                jsPsych.data.addData('Condition_Type', condition.type);
+                                jsPsych.data.addData('Level', level_num);
+                                jsPsych.data.addData('Stage', stage);
+                                jsPsych.data.addData('State', 'A1');
+                                jsPsych.data.addData('Action', response);
+                                jsPsych.data.addData('Next_State', next_state);
+                                jsPsych.data.addData('Reward', 0);
+                                jsPsych.data.addData('Probabilities', '');
+                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                jsPsych.data.addData('Trial', episode_index + 1);
+                                jsPsych.data.addData('Episode', episode_index + 1);
+                                jsPsych.data.addData('Score', total_reward);
+                                jsPsych.data.addData('set_num', set_num);
+                                jsPsych.data.addData('participant_id', participant_id);
+                                jsPsych.data.addData('phase', phase);
+                                jsPsych.data.addData('condition_type', condition.type);
+                                jsPsych.data.addData('level_num', level_num);
+                                jsPsych.data.addData('stage', stage);
+                                jsPsych.data.addData('state', 'A1');
+                                jsPsych.data.addData('action', response);
+                                jsPsych.data.addData('next_state', next_state);
+                                jsPsych.data.addData('reward', 0);
+                                jsPsych.data.addData('probabilities', '');
+                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                jsPsych.data.addData('episode_index', episode_index + 1);
+                                jsPsych.data.addData('trial', episode_index + 1);
+                                stage += 1;
+
+                                // Stage 2: X -> Terminal
+                                // Display X state
+                                timeline.push(create_shape_trial(next_state, scoreboard_text));
+
+                                // Instruction for second step
+                                let instruction_2 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
+                                timeline.push(create_arrow_response_trial(instruction_2, next_state, scoreboard_text));
+
+                                // Handle second response
+                                timeline.push({
+                                    type: 'call-function',
+                                    func: function(data) {
+                                        let response_2 = data.response;
+                                        if (response_2 === 'Escape') {
+                                            jsPsych.endExperiment("Experiment terminated by user.");
+                                        }
+                                        let action_2 = '';
+                                        if (response_2 === 'ArrowLeft') {
+                                            action_2 = 'left';
+                                        } else if (response_2 === 'ArrowRight') {
+                                            action_2 = 'right';
+                                        }
+
+                                        // Get probabilities
+                                        let key = `${next_state}_${action_2}`;
+                                        let probs = is_reward_cond ? reward_prob_map[key] : punishment_prob_map[key];
+                                        if (condition.probability_reversal) {
+                                            probs = probs.slice().reverse();
+                                        }
+
+                                        // Final transition
+                                        let final = final_transition(is_reward_cond, probs, reward_value);
+                                        let final_state = final.chosen;
+                                        let final_reward = final.reward;
+
+                                        // Log second transition
+                                        jsPsych.data.addData('Set', set_num);
+                                        jsPsych.data.addData('Participant', participant_id);
+                                        jsPsych.data.addData('Phase', phase);
+                                        jsPsych.data.addData('Condition_Type', condition.type);
+                                        jsPsych.data.addData('Level', level_num);
+                                        jsPsych.data.addData('Stage', stage);
+                                        jsPsych.data.addData('State', next_state);
+                                        jsPsych.data.addData('Action', action_2);
+                                        jsPsych.data.addData('Next_State', final_state);
+                                        jsPsych.data.addData('Reward', final_reward);
+                                        jsPsych.data.addData('Probabilities', probs);
+                                        jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                        jsPsych.data.addData('Trial', episode_index + 1);
+                                        jsPsych.data.addData('Episode', episode_index + 1);
+                                        jsPsych.data.addData('Score', total_reward);
+                                        jsPsych.data.addData('set_num', set_num);
+                                        jsPsych.data.addData('participant_id', participant_id);
+                                        jsPsych.data.addData('phase', phase);
+                                        jsPsych.data.addData('condition_type', condition.type);
+                                        jsPsych.data.addData('level_num', level_num);
+                                        jsPsych.data.addData('stage', stage);
+                                        jsPsych.data.addData('state', next_state);
+                                        jsPsych.data.addData('action', action_2);
+                                        jsPsych.data.addData('next_state', final_state);
+                                        jsPsych.data.addData('reward', final_reward);
+                                        jsPsych.data.addData('probabilities', probs);
+                                        jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                        jsPsych.data.addData('episode_index', episode_index + 1);
+                                        jsPsych.data.addData('trial', episode_index + 1);
+                                        stage += 1;
+
+                                        total_reward += final_reward;
+
+                                        // Display reward message if terminal state
+                                        if (['R1', 'R2', 'P1', 'P2'].includes(final_state)) {
+                                            let reward_message = `You received a reward of ${final_reward} points!\nTotal Reward: ${total_reward}`;
+                                            timeline.push(create_message_trial(reward_message, 2));
+
+                                            // Add terminal state shape
+                                            timeline.push(create_shape_trial(final_state, `Total Reward: ${total_reward}`));
+                                        }
+                                    }
+                                });
+                            } else if (phase === 3) {
+                                // Three-step transitions (A1 -> X -> Y -> Terminal)
+                                // Stage 1: A1 -> X
+                                let next_state = '';
+                                if (response === '1') {
+                                    next_state = 'X1';
+                                } else if (response === '2') {
+                                    next_state = 'X2';
+                                } else if (response === '3') {
+                                    next_state = 'X3';
+                                } else {
+                                    next_state = 'X3'; // Default
+                                }
+
+                                // Log first transition
+                                jsPsych.data.addData('Set', set_num);
+                                jsPsych.data.addData('Participant', participant_id);
+                                jsPsych.data.addData('Phase', phase);
+                                jsPsych.data.addData('Condition_Type', condition.type);
+                                jsPsych.data.addData('Level', level_num);
+                                jsPsych.data.addData('Stage', stage);
+                                jsPsych.data.addData('State', 'A1');
+                                jsPsych.data.addData('Action', response);
+                                jsPsych.data.addData('Next_State', next_state);
+                                jsPsych.data.addData('Reward', 0);
+                                jsPsych.data.addData('Probabilities', '');
+                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                jsPsych.data.addData('Trial', episode_index + 1);
+                                jsPsych.data.addData('Episode', episode_index + 1);
+                                jsPsych.data.addData('Score', total_reward);
+                                jsPsych.data.addData('set_num', set_num);
+                                jsPsych.data.addData('participant_id', participant_id);
+                                jsPsych.data.addData('phase', phase);
+                                jsPsych.data.addData('condition_type', condition.type);
+                                jsPsych.data.addData('level_num', level_num);
+                                jsPsych.data.addData('stage', stage);
+                                jsPsych.data.addData('state', 'A1');
+                                jsPsych.data.addData('action', response);
+                                jsPsych.data.addData('next_state', next_state);
+                                jsPsych.data.addData('reward', 0);
+                                jsPsych.data.addData('probabilities', '');
+                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                jsPsych.data.addData('episode_index', episode_index + 1);
+                                jsPsych.data.addData('trial', episode_index + 1);
+                                stage += 1;
+
+                                // Stage 2: X -> Y
+                                let y_state = {'X1':'Y1','X2':'Y2','X3':'Y3'}[next_state] || 'Y3';
+                                timeline.push(create_shape_trial(next_state, scoreboard_text));
+
+                                let instruction_2 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
+                                timeline.push(create_arrow_response_trial(instruction_2, next_state, scoreboard_text));
+
+                                // Handle second response
+                                timeline.push({
+                                    type: 'call-function',
+                                    func: function(data) {
+                                        let response_2 = data.response;
+                                        if (response_2 === 'Escape') {
+                                            jsPsych.endExperiment("Experiment terminated by user.");
+                                        }
+                                        let action_2 = '';
+                                        if (response_2 === 'ArrowLeft') {
+                                            action_2 = 'left';
+                                        } else if (response_2 === 'ArrowRight') {
+                                            action_2 = 'right';
+                                        }
+
+                                        // Get probabilities for Y state
+                                        let key = `${y_state}_${action_2}`;
+                                        let probs = is_reward_cond ? reward_prob_map[key] : punishment_prob_map[key];
+                                        if (condition.probability_reversal) {
+                                            probs = probs.slice().reverse();
+                                        }
+
+                                        // Final transition
+                                        let final = final_transition(is_reward_cond, probs, reward_value);
+                                        let final_state = final.chosen;
+                                        let final_reward = final.reward;
+
+                                        // Log second transition
+                                        jsPsych.data.addData('Set', set_num);
+                                        jsPsych.data.addData('Participant', participant_id);
+                                        jsPsych.data.addData('Phase', phase);
+                                        jsPsych.data.addData('Condition_Type', condition.type);
+                                        jsPsych.data.addData('Level', level_num);
+                                        jsPsych.data.addData('Stage', stage);
+                                        jsPsych.data.addData('State', next_state);
+                                        jsPsych.data.addData('Action', action_2);
+                                        jsPsych.data.addData('Next_State', y_state);
+                                        jsPsych.data.addData('Reward', 0);
+                                        jsPsych.data.addData('Probabilities', '');
+                                        jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                        jsPsych.data.addData('Trial', episode_index + 1);
+                                        jsPsych.data.addData('Episode', episode_index + 1);
+                                        jsPsych.data.addData('Score', total_reward);
+                                        jsPsych.data.addData('set_num', set_num);
+                                        jsPsych.data.addData('participant_id', participant_id);
+                                        jsPsych.data.addData('phase', phase);
+                                        jsPsych.data.addData('condition_type', condition.type);
+                                        jsPsych.data.addData('level_num', level_num);
+                                        jsPsych.data.addData('stage', stage);
+                                        jsPsych.data.addData('state', next_state);
+                                        jsPsych.data.addData('action', action_2);
+                                        jsPsych.data.addData('next_state', y_state);
+                                        jsPsych.data.addData('reward', 0);
+                                        jsPsych.data.addData('probabilities', '');
+                                        jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                        jsPsych.data.addData('episode_index', episode_index + 1);
+                                        jsPsych.data.addData('trial', episode_index + 1);
+                                        stage += 1;
+
+                                        // Stage 3: Y -> Terminal
+                                        timeline.push(create_shape_trial(y_state, scoreboard_text));
+
+                                        // Instruction for final step
+                                        let instruction_3 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
+                                        timeline.push(create_arrow_response_trial(instruction_3, y_state, scoreboard_text));
+
+                                        // Handle final response
+                                        timeline.push({
+                                            type: 'call-function',
+                                            func: function(data_final) {
+                                                let response_final = data_final.response;
+                                                if (response_final === 'Escape') {
+                                                    jsPsych.endExperiment("Experiment terminated by user.");
+                                                }
+                                                let action_final = '';
+                                                if (response_final === 'ArrowLeft') {
+                                                    action_final = 'left';
+                                                } else if (response_final === 'ArrowRight') {
+                                                    action_final = 'right';
+                                                }
+
+                                                // Get probabilities for final transition
+                                                let key_final = `${y_state}_${action_final}`;
+                                                let probs_final = is_reward_cond ? reward_prob_map[key_final] : punishment_prob_map[key_final];
+                                                if (condition.probability_reversal) {
+                                                    probs_final = probs_final.slice().reverse();
+                                                }
+
+                                                // Final transition
+                                                let final_final = final_transition(is_reward_cond, probs_final, reward_value);
+                                                let final_final_state = final_final.chosen;
+                                                let final_final_reward = final_final.reward;
+
+                                                // Log final transition
+                                                jsPsych.data.addData('Set', set_num);
+                                                jsPsych.data.addData('Participant', participant_id);
+                                                jsPsych.data.addData('Phase', phase);
+                                                jsPsych.data.addData('Condition_Type', condition.type);
+                                                jsPsych.data.addData('Level', level_num);
+                                                jsPsych.data.addData('Stage', stage);
+                                                jsPsych.data.addData('State', y_state);
+                                                jsPsych.data.addData('Action', action_final);
+                                                jsPsych.data.addData('Next_State', final_final_state);
+                                                jsPsych.data.addData('Reward', final_final_reward);
+                                                jsPsych.data.addData('Probabilities', probs_final);
+                                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                                jsPsych.data.addData('Trial', episode_index + 1);
+                                                jsPsych.data.addData('Episode', episode_index + 1);
+                                                jsPsych.data.addData('Score', total_reward);
+                                                jsPsych.data.addData('set_num', set_num);
+                                                jsPsych.data.addData('participant_id', participant_id);
+                                                jsPsych.data.addData('phase', phase);
+                                                jsPsych.data.addData('condition_type', condition.type);
+                                                jsPsych.data.addData('level_num', level_num);
+                                                jsPsych.data.addData('stage', stage);
+                                                jsPsych.data.addData('state', y_state);
+                                                jsPsych.data.addData('action', action_final);
+                                                jsPsych.data.addData('next_state', final_final_state);
+                                                jsPsych.data.addData('reward', final_final_reward);
+                                                jsPsych.data.addData('probabilities', probs_final);
+                                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                                jsPsych.data.addData('episode_index', episode_index + 1);
+                                                jsPsych.data.addData('trial', episode_index + 1);
+                                                stage += 1;
+
+                                                total_reward += final_final_reward;
+
+                                                // Display final reward message if terminal state
+                                                if (['R1', 'R2', 'P1', 'P2'].includes(final_final_state)) {
+                                                    let final_reward_message = `You received a reward of ${final_final_reward} points!\nTotal Reward: ${total_reward}`;
+                                                    timeline.push(create_message_trial(final_reward_message, 2));
+
+                                                    // Add terminal state shape
+                                                    timeline.push(create_shape_trial(final_final_state, `Total Reward: ${total_reward}`));
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+
+                            } else if (phase === 3) {
+                                // Three-step transitions (A1 -> X -> Y -> Terminal)
+                                // Stage 1: A1 -> X
+                                let next_state = '';
+                                if (response === '1') {
+                                    next_state = 'X1';
+                                } else if (response === '2') {
+                                    next_state = 'X2';
+                                } else if (response === '3') {
+                                    next_state = 'X3';
+                                } else {
+                                    next_state = 'X3'; // Default
+                                }
+
+                                // Log first transition
+                                jsPsych.data.addData('Set', set_num);
+                                jsPsych.data.addData('Participant', participant_id);
+                                jsPsych.data.addData('Phase', phase);
+                                jsPsych.data.addData('Condition_Type', condition.type);
+                                jsPsych.data.addData('Level', level_num);
+                                jsPsych.data.addData('Stage', stage);
+                                jsPsych.data.addData('State', 'A1');
+                                jsPsych.data.addData('Action', response);
+                                jsPsych.data.addData('Next_State', next_state);
+                                jsPsych.data.addData('Reward', 0);
+                                jsPsych.data.addData('Probabilities', '');
+                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                jsPsych.data.addData('Trial', episode_index + 1);
+                                jsPsych.data.addData('Episode', episode_index + 1);
+                                jsPsych.data.addData('Score', total_reward);
+                                jsPsych.data.addData('set_num', set_num);
+                                jsPsych.data.addData('participant_id', participant_id);
+                                jsPsych.data.addData('phase', phase);
+                                jsPsych.data.addData('condition_type', condition.type);
+                                jsPsych.data.addData('level_num', level_num);
+                                jsPsych.data.addData('stage', stage);
+                                jsPsych.data.addData('state', 'A1');
+                                jsPsych.data.addData('action', response);
+                                jsPsych.data.addData('next_state', next_state);
+                                jsPsych.data.addData('reward', 0);
+                                jsPsych.data.addData('probabilities', '');
+                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                jsPsych.data.addData('episode_index', episode_index + 1);
+                                jsPsych.data.addData('trial', episode_index + 1);
+                                stage += 1;
+
+                                // Stage 2: X -> Y
+                                let y_state = {'X1':'Y1','X2':'Y2','X3':'Y3'}[next_state] || 'Y3';
+                                timeline.push(create_shape_trial(next_state, scoreboard_text));
+
+                                let instruction_2 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
+                                timeline.push(create_arrow_response_trial(instruction_2, next_state, scoreboard_text));
+
+                                // Handle second response
+                                timeline.push({
+                                    type: 'call-function',
+                                    func: function(data_2) {
+                                        let response_2 = data_2.response;
+                                        if (response_2 === 'Escape') {
+                                            jsPsych.endExperiment("Experiment terminated by user.");
+                                        }
+                                        let action_2 = '';
+                                        if (response_2 === 'ArrowLeft') {
+                                            action_2 = 'left';
+                                        } else if (response_2 === 'ArrowRight') {
+                                            action_2 = 'right';
+                                        }
+
+                                        // Get probabilities for Y state
+                                        let key = `${y_state}_${action_2}`;
+                                        let probs = is_reward_cond ? reward_prob_map[key] : punishment_prob_map[key];
+                                        if (condition.probability_reversal) {
+                                            probs = probs.slice().reverse();
+                                        }
+
+                                        // Final transition to Terminal
+                                        let final = final_transition(is_reward_cond, probs, reward_value);
+                                        let final_state = final.chosen;
+                                        let final_reward = final.reward;
+
+                                        // Log second transition
+                                        jsPsych.data.addData('Set', set_num);
+                                        jsPsych.data.addData('Participant', participant_id);
+                                        jsPsych.data.addData('Phase', phase);
+                                        jsPsych.data.addData('Condition_Type', condition.type);
+                                        jsPsych.data.addData('Level', level_num);
+                                        jsPsych.data.addData('Stage', stage);
+                                        jsPsych.data.addData('State', next_state);
+                                        jsPsych.data.addData('Action', action_2);
+                                        jsPsych.data.addData('Next_State', y_state);
+                                        jsPsych.data.addData('Reward', 0);
+                                        jsPsych.data.addData('Probabilities', '');
+                                        jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                        jsPsych.data.addData('Trial', episode_index + 1);
+                                        jsPsych.data.addData('Episode', episode_index + 1);
+                                        jsPsych.data.addData('Score', total_reward);
+                                        jsPsych.data.addData('set_num', set_num);
+                                        jsPsych.data.addData('participant_id', participant_id);
+                                        jsPsych.data.addData('phase', phase);
+                                        jsPsych.data.addData('condition_type', condition.type);
+                                        jsPsych.data.addData('level_num', level_num);
+                                        jsPsych.data.addData('stage', stage);
+                                        jsPsych.data.addData('state', next_state);
+                                        jsPsych.data.addData('action', action_2);
+                                        jsPsych.data.addData('next_state', y_state);
+                                        jsPsych.data.addData('reward', 0);
+                                        jsPsych.data.addData('probabilities', '');
+                                        jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                        jsPsych.data.addData('episode_index', episode_index + 1);
+                                        jsPsych.data.addData('trial', episode_index + 1);
+                                        stage += 1;
+
+                                        // Stage 3: Y -> Terminal
+                                        timeline.push(create_shape_trial(y_state, scoreboard_text));
+
+                                        // Instruction for final step
+                                        let instruction_3 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
+                                        timeline.push(create_arrow_response_trial(instruction_3, y_state, scoreboard_text));
+
+                                        // Handle final response
+                                        timeline.push({
+                                            type: 'call-function',
+                                            func: function(data_final) {
+                                                let response_final = data_final.response;
+                                                if (response_final === 'Escape') {
+                                                    jsPsych.endExperiment("Experiment terminated by user.");
+                                                }
+                                                let action_final = '';
+                                                if (response_final === 'ArrowLeft') {
+                                                    action_final = 'left';
+                                                } else if (response_final === 'ArrowRight') {
+                                                    action_final = 'right';
+                                                }
+
+                                                // Get probabilities for final transition
+                                                let key_final = `${y_state}_${action_final}`;
+                                                let probs_final = is_reward_cond ? reward_prob_map[key_final] : punishment_prob_map[key_final];
+                                                if (condition.probability_reversal) {
+                                                    probs_final = probs_final.slice().reverse();
+                                                }
+
+                                                // Final transition
+                                                let final_final = final_transition(is_reward_cond, probs_final, reward_value);
+                                                let final_final_state = final_final.chosen;
+                                                let final_final_reward = final_final.reward;
+
+                                                // Log final transition
+                                                jsPsych.data.addData('Set', set_num);
+                                                jsPsych.data.addData('Participant', participant_id);
+                                                jsPsych.data.addData('Phase', phase);
+                                                jsPsych.data.addData('Condition_Type', condition.type);
+                                                jsPsych.data.addData('Level', level_num);
+                                                jsPsych.data.addData('Stage', stage);
+                                                jsPsych.data.addData('State', y_state);
+                                                jsPsych.data.addData('Action', action_final);
+                                                jsPsych.data.addData('Next_State', final_final_state);
+                                                jsPsych.data.addData('Reward', final_final_reward);
+                                                jsPsych.data.addData('Probabilities', probs_final);
+                                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
+                                                jsPsych.data.addData('Trial', episode_index + 1);
+                                                jsPsych.data.addData('Episode', episode_index + 1);
+                                                jsPsych.data.addData('Score', total_reward);
+                                                jsPsych.data.addData('set_num', set_num);
+                                                jsPsych.data.addData('participant_id', participant_id);
+                                                jsPsych.data.addData('phase', phase);
+                                                jsPsych.data.addData('condition_type', condition.type);
+                                                jsPsych.data.addData('level_num', level_num);
+                                                jsPsych.data.addData('stage', stage);
+                                                jsPsych.data.addData('state', y_state);
+                                                jsPsych.data.addData('action', action_final);
+                                                jsPsych.data.addData('next_state', final_final_state);
+                                                jsPsych.data.addData('reward', final_final_reward);
+                                                jsPsych.data.addData('probabilities', probs_final);
+                                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
+                                                jsPsych.data.addData('episode_index', episode_index + 1);
+                                                jsPsych.data.addData('trial', episode_index + 1);
+                                                stage += 1;
+
+                                                total_reward += final_final_reward;
+
+                                                // Display final reward message if terminal state
+                                                if (['R1', 'R2', 'P1', 'P2'].includes(final_final_state)) {
+                                                    let final_reward_message = `You received a reward of ${final_final_reward} points!\nTotal Reward: ${total_reward}`;
+                                                    timeline.push(create_message_trial(final_reward_message, 2));
+
+                                                    // Add terminal state shape
+                                                    timeline.push(create_shape_trial(final_final_state, `Total Reward: ${total_reward}`));
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+
+                            }
+                        }
+                    });
+
+                }
+
+                return timeline;
+            }
+
+            // Function to run all levels within a condition
+            function run_condition(phase, condition, level_num, set_num, participant_id) {
+                const trials = run_level(phase, condition, level_num, set_num, participant_id);
+                return trials;
+            }
+
+            // Main Experiment Timeline
+            let timeline = [];
+
+            // Initialize data
+            jsPsych.data.addProperties({
+                participant_id: participant_id
+            });
+
+            // (1) Collect SPQ Survey
+            const spq_trial = {
+                type: 'survey-likert',
+                questions: spq_survey,
+                data: {survey: 'SPQ'}
+            };
+            timeline.push(create_message_trial("Starting SPQ Survey.\nPress any key to begin.", null));
+            timeline.push(spq_trial);
+            timeline.push(create_message_trial("Finished SPQ Survey!\nPress any key to continue.", null));
+
+            // (2) Collect SPSRQ-RC Survey
+            const spsrq_trial = {
+                type: 'survey-likert',
+                questions: spsrq_survey.map(q => ({
+                    prompt: q.prompt,
+                    name: q.name,
+                    labels: ['Yes', 'No'],
+                    required: true,
+                    horizontal: true
+                })),
+                data: {survey: 'SPSRQ_RC'}
+            };
+            timeline.push(create_message_trial("Starting SPSRQ-RC Survey.\nPress any key to begin.", null));
+            timeline.push(spsrq_trial);
+            timeline.push(create_message_trial("Finished SPSRQ-RC Survey!\nPress any key to continue.", null));
+
+            // (3) Main RL-like Experiment
+            for (let set_num = 1; set_num <= num_sets; set_num++) {
+                timeline.push(create_message_trial(`=== Starting Set ${set_num} ===`, null));
+                total_reward = 0;
+
+                for (let phase of phase_list) {
+                    timeline.push(create_message_trial(`--- Starting Phase ${phase} ---`, null));
+
+                    let conditions = get_conditions(set_num);
+                    for (let condition of conditions) {
+                        timeline.push(create_message_trial(`Starting ${capitalize(condition.type)} Condition in Phase ${phase}.`, 2));
+
+                        for (let level_num = 1; level_num <= 3; level_num++) {
+                            timeline.push(create_message_trial(`  Starting Level ${level_num}`, null));
+
+                            let condition_timeline = run_condition(phase, condition, level_num, set_num, participant_id);
+                            timeline = timeline.concat(condition_timeline);
+
+                            timeline.push(create_message_trial(
+                                `Completed Level ${level_num} of Phase ${phase} in Set ${set_num} in ${capitalize(condition.type)} Condition.\nTotal Reward: ${total_reward}`,
+                                3
+                            ));
+                        }
+                    }
+
+                    if (phase < Math.max(...phase_list)) {
+                        timeline.push(create_message_trial(`Proceeding to Phase ${phase + 1} in Set ${set_num}.`, 3));
+                    } else {
+                        if (set_num < num_sets) {
+                            timeline.push(create_message_trial(`Completed Set ${set_num}.\nProceeding to Set ${set_num + 1}.`, 3));
+                        } else {
+                            timeline.push(create_message_trial(
+                                "Thank you for participating in the research!\nYou have completed all phases and sets.",
+                                3
+                            ));
+                        }
+                    }
+                }
+
+                // Save data for the set
+                timeline.push({
+                    type: 'call-function',
+                    func: function(){
+                        jsPsych.data.get().localSave('csv', `participant_${participant_id}_set${set_num}.csv`);
+                    }
+                });
+            }
+
+            // (4) Post-Experiment Survey
+            timeline.push(create_message_trial("Starting Post-Experiment Survey.\nPress any key to begin.", null));
+            const postExp_trial = {
+                type: 'survey-html-form',
+                html: postExp_questions.map(q => {
+                    if (q.type === 'likert') {
+                        return `<p>${q.prompt}</p>
+                                <label>
+                                    ${q.labels.map(label => `<input type="radio" name="${q.name}" value="${label}"> ${label}<br>`).join('')}
+                                </label>`;
+                    } else if (q.type === 'text') {
+                        return `<p>${q.prompt}</p>
+                                <textarea name="${q.name}" rows="5" cols="60" placeholder="${q.placeholder || ''}"></textarea>`;
+                    }
+                }).join(''),
+                data: {survey: 'PostExp'}
+            };
+            timeline.push(postExp_trial);
+            timeline.push(create_message_trial("Finished Post-Experiment Survey!\nPress any key to complete the experiment.", null));
+
+            // Run the experiment
+            jsPsych.run(timeline);
+        });
+    </script>
+</body>
+</html>
