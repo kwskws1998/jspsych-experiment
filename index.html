@@ -575,11 +575,6 @@
                                 const arrow_response_trial = create_arrow_response_trial(instruction_2, next_state, scoreboard_text);
                                 jsPsych.addNodeToEndOfTimeline(arrow_response_trial);
 
-                                // Arrow response handling
-                                jsPsych.getDisplayElement().addEventListener('keydown', function(event) {
-                                    // Custom handling if needed
-                                });
-
                                 // Define a new trial to handle arrow responses
                                 const arrow_trial_handler = {
                                     type: 'html-keyboard-response',
@@ -688,60 +683,59 @@
                                     type: 'html-keyboard-response',
                                     stimulus: '',
                                     choices: ['ArrowLeft', 'ArrowRight', 'Escape'],
-                                    on_finish: function(data_2) {
-                                        const response_2 = data_2.response;
-                                        if (response_2 === 'Escape') {
+                                    on_finish: function(data_final) {
+                                        const response_final = data_final.response;
+                                        if (response_final === 'Escape') {
                                             jsPsych.endExperiment("Experiment terminated by user.");
                                             return;
                                         }
-                                        let action_2 = '';
-                                        if (response_2 === 'ArrowLeft') {
-                                            action_2 = 'left';
-                                        } else if (response_2 === 'ArrowRight') {
-                                            action_2 = 'right';
+                                        let action_final = '';
+                                        if (response_final === 'ArrowLeft') {
+                                            action_final = 'left';
+                                        } else if (response_final === 'ArrowRight') {
+                                            action_final = 'right';
                                         }
 
-                                        // Get probabilities for Y state
-                                        let y_state = {'X1':'Y1','X2':'Y2','X3':'Y3'}[next_state] || 'Y3';
-                                        let key = `${y_state}_${action_2}`;
-                                        let probs = is_reward_cond ? reward_prob_map[key] : punishment_prob_map[key];
+                                        // Get probabilities for final transition
+                                        let key_final = `${next_state}_${action_final}`;
+                                        let probs_final = is_reward_cond ? reward_prob_map[key_final] : punishment_prob_map[key_final];
                                         if (condition.probability_reversal) {
-                                            probs = probs.slice().reverse();
+                                            probs_final = probs_final.slice().reverse();
                                         }
 
                                         // Final transition
-                                        let final = final_transition(is_reward_cond, probs, reward_value);
-                                        let final_state = final.chosen;
-                                        let final_reward = final.reward;
+                                        let final_final = final_transition(is_reward_cond, probs_final, reward_value);
+                                        let final_final_state = final_final.chosen;
+                                        let final_final_reward = final_final.reward;
 
-                                        // Log second transition
+                                        // Log final transition
                                         jsPsych.data.addData('Set', set_num);
                                         jsPsych.data.addData('Participant', participant_id);
                                         jsPsych.data.addData('Phase', phase);
                                         jsPsych.data.addData('Condition_Type', condition.type);
                                         jsPsych.data.addData('Level', level_num);
                                         jsPsych.data.addData('Stage', stage);
-                                        jsPsych.data.addData('State', y_state);
-                                        jsPsych.data.addData('Action', action_2);
-                                        jsPsych.data.addData('Next_State', final_state);
-                                        jsPsych.data.addData('Reward', final_reward);
-                                        jsPsych.data.addData('Probabilities', probs);
+                                        jsPsych.data.addData('State', next_state);
+                                        jsPsych.data.addData('Action', action_final);
+                                        jsPsych.data.addData('Next_State', final_final_state);
+                                        jsPsych.data.addData('Reward', final_final_reward);
+                                        jsPsych.data.addData('Probabilities', probs_final);
                                         jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
                                         jsPsych.data.addData('Trial', episode_index + 1);
                                         jsPsych.data.addData('Episode', episode_index + 1);
                                         jsPsych.data.addData('Score', total_reward);
                                         stage += 1;
 
-                                        total_reward += final_reward;
+                                        total_reward += final_final_reward;
 
                                         // Display reward message if terminal state
-                                        if (['R1', 'R2', 'P1', 'P2'].includes(final_state)) {
-                                            const reward_message = `You received a reward of ${final_reward} points!\nTotal Reward: ${total_reward}`;
+                                        if (['R1', 'R2', 'P1', 'P2'].includes(final_final_state)) {
+                                            const reward_message = `You received a reward of ${final_final_reward} points!\nTotal Reward: ${total_reward}`;
                                             const reward_trial = create_message_trial(reward_message, 2);
                                             jsPsych.addNodeToEndOfTimeline(reward_trial);
 
                                             // Add terminal state shape
-                                            const terminal_shape = create_shape_trial(final_state, `Total Reward: ${total_reward}`);
+                                            const terminal_shape = create_shape_trial(final_final_state, `Total Reward: ${total_reward}`);
                                             jsPsych.addNodeToEndOfTimeline(terminal_shape);
                                         }
                                     }
