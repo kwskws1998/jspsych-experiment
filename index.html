@@ -11,6 +11,8 @@
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-survey-likert.js"></script>
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-survey-text.js"></script>
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-canvas-shape.js"></script>
+    <!-- Include jsPsych Call Function Plugin -->
+    <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-call-function.js"></script>
     <!-- Include jsPsych HTTP Request Plugin -->
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-http-request.js"></script>
     <style>
@@ -777,155 +779,157 @@
                                 });
 
                             }
+                        });
+
+                    }
+
+                    return timeline;
+                }
+
+                // Function to run all levels within a condition
+                function run_condition(phase, condition, level_num, set_num, participant_id) {
+                    const trials = run_level(phase, condition, level_num, set_num, participant_id);
+                    return trials;
+                }
+
+                // Main Experiment Timeline
+                let timeline = [];
+
+                // Initialize data
+                jsPsych.data.addProperties({
+                    participant_id: participant_id
+                });
+
+                // (1) Collect SPQ Survey
+                const spq_trial = {
+                    type: 'survey-likert',
+                    questions: spq_survey,
+                    data: {survey: 'SPQ'}
+                };
+                timeline.push(create_message_trial("Starting SPQ Survey.\nPress any key to begin.", null));
+                timeline.push(spq_trial);
+                timeline.push(create_message_trial("Finished SPQ Survey!\nPress any key to continue.", null));
+
+                // (2) Collect SPSRQ-RC Survey
+                const spsrq_trial = {
+                    type: 'survey-likert',
+                    questions: spsrq_survey.map(q => ({
+                        prompt: q.prompt,
+                        name: q.name,
+                        labels: ['Yes', 'No'],
+                        required: true,
+                        horizontal: true
+                    })),
+                    data: {survey: 'SPSRQ_RC'}
+                };
+                timeline.push(create_message_trial("Starting SPSRQ-RC Survey.\nPress any key to begin.", null));
+                timeline.push(spsrq_trial);
+                timeline.push(create_message_trial("Finished SPSRQ-RC Survey!\nPress any key to continue.", null));
+
+                // (3) Main RL-like Experiment
+                for (let set_num = 1; set_num <= num_sets; set_num++) {
+                    timeline.push(create_message_trial(`=== Starting Set ${set_num} ===`, null));
+                    total_reward = 0;
+
+                    for (let phase of phase_list) {
+                        timeline.push(create_message_trial(`--- Starting Phase ${phase} ---`, null));
+
+                        let conditions = get_conditions(set_num);
+                        for (let condition of conditions) {
+                            timeline.push(create_message_trial(`Starting ${capitalize(condition.type)} Condition in Phase ${phase}.`, 2));
+
+                            for (let level_num = 1; level_num <= 3; level_num++) {
+                                timeline.push(create_message_trial(`  Starting Level ${level_num}`, null));
+
+                                let condition_timeline = run_condition(phase, condition, level_num, set_num, participant_id);
+                                timeline = timeline.concat(condition_timeline);
+
+                                timeline.push(create_message_trial(
+                                    `Completed Level ${level_num} of Phase ${phase} in Set ${set_num} in ${capitalize(condition.type)} Condition.\nTotal Reward: ${total_reward}`,
+                                    3
+                                ));
+                            }
+                        }
+
+                        if (phase < Math.max(...phase_list)) {
+                            timeline.push(create_message_trial(`Proceeding to Phase ${phase + 1} in Set ${set_num}.`, 3));
+                        } else {
+                            if (set_num < num_sets) {
+                                timeline.push(create_message_trial(`Completed Set ${set_num}.\nProceeding to Set ${set_num + 1}.`, 3));
+                            } else {
+                                timeline.push(create_message_trial(
+                                    "Thank you for participating in the research!\nYou have completed all phases and sets.",
+                                    3
+                                ));
+                            }
+                        }
+                    }
+
+                    // Save data for the set locally (optional)
+                    timeline.push({
+                        type: 'call-function',
+                        func: function(){
+                            jsPsych.data.get().localSave('csv', `participant_${participant_id}_set${set_num}.csv`);
                         }
                     });
-
                 }
 
-                return timeline;
-            }
-
-            // Function to run all levels within a condition
-            function run_condition(phase, condition, level_num, set_num, participant_id) {
-                const trials = run_level(phase, condition, level_num, set_num, participant_id);
-                return trials;
-            }
-
-            // Main Experiment Timeline
-            let timeline = [];
-
-            // Initialize data
-            jsPsych.data.addProperties({
-                participant_id: participant_id
-            });
-
-            // (1) Collect SPQ Survey
-            const spq_trial = {
-                type: 'survey-likert',
-                questions: spq_survey,
-                data: {survey: 'SPQ'}
-            };
-            timeline.push(create_message_trial("Starting SPQ Survey.\nPress any key to begin.", null));
-            timeline.push(spq_trial);
-            timeline.push(create_message_trial("Finished SPQ Survey!\nPress any key to continue.", null));
-
-            // (2) Collect SPSRQ-RC Survey
-            const spsrq_trial = {
-                type: 'survey-likert',
-                questions: spsrq_survey.map(q => ({
-                    prompt: q.prompt,
-                    name: q.name,
-                    labels: ['Yes', 'No'],
-                    required: true,
-                    horizontal: true
-                })),
-                data: {survey: 'SPSRQ_RC'}
-            };
-            timeline.push(create_message_trial("Starting SPSRQ-RC Survey.\nPress any key to begin.", null));
-            timeline.push(spsrq_trial);
-            timeline.push(create_message_trial("Finished SPSRQ-RC Survey!\nPress any key to continue.", null));
-
-            // (3) Main RL-like Experiment
-            for (let set_num = 1; set_num <= num_sets; set_num++) {
-                timeline.push(create_message_trial(`=== Starting Set ${set_num} ===`, null));
-                total_reward = 0;
-
-                for (let phase of phase_list) {
-                    timeline.push(create_message_trial(`--- Starting Phase ${phase} ---`, null));
-
-                    let conditions = get_conditions(set_num);
-                    for (let condition of conditions) {
-                        timeline.push(create_message_trial(`Starting ${capitalize(condition.type)} Condition in Phase ${phase}.`, 2));
-
-                        for (let level_num = 1; level_num <= 3; level_num++) {
-                            timeline.push(create_message_trial(`  Starting Level ${level_num}`, null));
-
-                            let condition_timeline = run_condition(phase, condition, level_num, set_num, participant_id);
-                            timeline = timeline.concat(condition_timeline);
-
-                            timeline.push(create_message_trial(
-                                `Completed Level ${level_num} of Phase ${phase} in Set ${set_num} in ${capitalize(condition.type)} Condition.\nTotal Reward: ${total_reward}`,
-                                3
-                            ));
+                // (4) Post-Experiment Survey
+                timeline.push(create_message_trial("Starting Post-Experiment Survey.\nPress any key to begin.", null));
+                const postExp_trial = {
+                    type: 'survey-html-form',
+                    html: postExp_questions.map(q => {
+                        if (q.labels) { // Assuming likert type
+                            return `<p>${q.prompt}</p>
+                                    <label>
+                                        ${q.labels.map(label => `<input type="radio" name="${q.name}" value="${label}"> ${label}<br>`).join('')}
+                                    </label>`;
+                        } else { // Text type
+                            return `<p>${q.prompt}</p>
+                                    <textarea name="${q.name}" rows="5" cols="60" placeholder="${q.placeholder || ''}"></textarea>`;
                         }
-                    }
+                    }).join(''),
+                    data: {survey: 'PostExp'}
+                };
+                timeline.push(postExp_trial);
+                timeline.push(create_message_trial("Finished Post-Experiment Survey!\nPress any key to complete the experiment.", null));
 
-                    if (phase < Math.max(...phase_list)) {
-                        timeline.push(create_message_trial(`Proceeding to Phase ${phase + 1} in Set ${set_num}.`, 3));
-                    } else {
-                        if (set_num < num_sets) {
-                            timeline.push(create_message_trial(`Completed Set ${set_num}.\nProceeding to Set ${set_num + 1}.`, 3));
+                // (5) Send Data to Sheet.best
+                const send_data = {
+                    type: 'http-request',
+                    url: 'https://api.sheetbest.com/sheets/f1709b83-4e56-478f-9c38-5467bb3b862c', // Your Sheet.best API endpoint
+                    method: 'POST',
+                    data: function() {
+                        return jsPsych.data.get().json(); // Sends all collected data in JSON format
+                    },
+                    on_finish: function(response) {
+                        if(response.status === 200){
+                            console.log('Data sent successfully:', response);
                         } else {
-                            timeline.push(create_message_trial(
-                                "Thank you for participating in the research!\nYou have completed all phases and sets.",
-                                3
-                            ));
+                            alert('There was an issue submitting your data. Please contact the researcher.');
+                            console.error('Data submission failed:', response);
                         }
                     }
-                }
+                };
+                timeline.push(send_data);
 
-                // Save data for the set locally (optional)
-                timeline.push({
-                    type: 'call-function',
-                    func: function(){
-                        jsPsych.data.get().localSave('csv', `participant_${participant_id}_set${set_num}.csv`);
+                // (6) Thank You Message
+                const thank_you = {
+                    type: 'html-keyboard-response',
+                    stimulus: `
+                        <p>Thank you for participating!</p>
+                        <p>Your responses have been recorded.</p>
+                    `,
+                    choices: [' '], // Allow participant to press space to finish
+                    on_finish: function() {
+                        jsPsych.endExperiment();
                     }
-                });
-            }
+                };
+                timeline.push(thank_you);
 
-            // (4) Post-Experiment Survey
-            timeline.push(create_message_trial("Starting Post-Experiment Survey.\nPress any key to begin.", null));
-            const postExp_trial = {
-                type: 'survey-html-form',
-                html: postExp_questions.map(q => {
-                    if (q.labels) { // Assuming likert type
-                        return `<p>${q.prompt}</p>
-                                <label>
-                                    ${q.labels.map(label => `<input type="radio" name="${q.name}" value="${label}"> ${label}<br>`).join('')}
-                                </label>`;
-                    } else { // Text type
-                        return `<p>${q.prompt}</p>
-                                <textarea name="${q.name}" rows="5" cols="60" placeholder="${q.placeholder || ''}"></textarea>`;
-                    }
-                }).join(''),
-                data: {survey: 'PostExp'}
-            };
-            timeline.push(postExp_trial);
-            timeline.push(create_message_trial("Finished Post-Experiment Survey!\nPress any key to complete the experiment.", null));
-
-            // (5) Send Data to Sheet.best
-            const send_data = {
-                type: 'http-request',
-                url: 'https://api.sheetbest.com/sheets/f1709b83-4e56-478f-9c38-5467bb3b862c', // Your Sheet.best API endpoint
-                method: 'POST',
-                data: function() {
-                    return jsPsych.data.get().json(); // Sends all collected data in JSON format
-                },
-                on_finish: function(response) {
-                    if(response.status === 200){
-                        console.log('Data sent successfully:', response);
-                    } else {
-                        alert('There was an issue submitting your data. Please contact the researcher.');
-                        console.error('Data submission failed:', response);
-                    }
-                }
-            };
-            timeline.push(send_data);
-
-            // (6) Thank You Message
-            const thank_you = {
-                type: 'html-keyboard-response',
-                stimulus: `
-                    <p>Thank you for participating!</p>
-                    <p>Your responses have been recorded.</p>
-                `,
-                choices: ['None']
-            };
-            timeline.push(thank_you);
-
-            // Run the experiment
-            jsPsych.run(timeline);
-        });
-    </script>
-</body>
+                // Run the experiment
+                jsPsych.run(timeline);
+            });
+        </script>
+    </body>
 </html>
