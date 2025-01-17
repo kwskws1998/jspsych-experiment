@@ -11,16 +11,26 @@
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-survey-likert.js"></script>
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-survey-text.js"></script>
     <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-canvas-shape.js"></script>
+    <!-- Include jsPsych HTTP Request Plugin -->
+    <script src="https://unpkg.com/jspsych@7.3.0/plugins/jspsych-http-request.js"></script>
     <style>
         body {
             margin: 0;
             padding: 0;
+            background-color: #333; /* Enhanced background color for better contrast */
         }
         .jspsych-content {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            color: white; /* Ensures text visibility on dark background */
+            font-family: Arial, sans-serif; /* Improved font for readability */
+        }
+        textarea {
+            width: 100%;
+            max-width: 600px;
+            resize: vertical;
         }
     </style>
 </head>
@@ -33,7 +43,7 @@
             const jsPsych = initJsPsych({
                 display_element: 'jspsych-target',
                 on_finish: function() {
-                    jsPsych.data.displayData();
+                    // Data submission is handled via a dedicated trial
                 },
                 auto_update_progress_bar: false,
             });
@@ -505,20 +515,6 @@
                                 jsPsych.data.addData('Trial', episode_index + 1);
                                 jsPsych.data.addData('Episode', episode_index + 1);
                                 jsPsych.data.addData('Score', total_reward);
-                                jsPsych.data.addData('set_num', set_num);
-                                jsPsych.data.addData('participant_id', participant_id);
-                                jsPsych.data.addData('phase', phase);
-                                jsPsych.data.addData('condition_type', condition.type);
-                                jsPsych.data.addData('level_num', level_num);
-                                jsPsych.data.addData('stage', stage);
-                                jsPsych.data.addData('state', current_state);
-                                jsPsych.data.addData('action', response);
-                                jsPsych.data.addData('next_state', next_state);
-                                jsPsych.data.addData('reward', step_reward);
-                                jsPsych.data.addData('probabilities', prob);
-                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                jsPsych.data.addData('episode_index', episode_index + 1);
-                                jsPsych.data.addData('trial', episode_index + 1);
                                 stage += 1;
 
                                 total_reward += step_reward;
@@ -562,20 +558,6 @@
                                 jsPsych.data.addData('Trial', episode_index + 1);
                                 jsPsych.data.addData('Episode', episode_index + 1);
                                 jsPsych.data.addData('Score', total_reward);
-                                jsPsych.data.addData('set_num', set_num);
-                                jsPsych.data.addData('participant_id', participant_id);
-                                jsPsych.data.addData('phase', phase);
-                                jsPsych.data.addData('condition_type', condition.type);
-                                jsPsych.data.addData('level_num', level_num);
-                                jsPsych.data.addData('stage', stage);
-                                jsPsych.data.addData('state', 'A1');
-                                jsPsych.data.addData('action', response);
-                                jsPsych.data.addData('next_state', next_state);
-                                jsPsych.data.addData('reward', 0);
-                                jsPsych.data.addData('probabilities', '');
-                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                jsPsych.data.addData('episode_index', episode_index + 1);
-                                jsPsych.data.addData('trial', episode_index + 1);
                                 stage += 1;
 
                                 // Stage 2: X -> Terminal
@@ -629,20 +611,6 @@
                                         jsPsych.data.addData('Trial', episode_index + 1);
                                         jsPsych.data.addData('Episode', episode_index + 1);
                                         jsPsych.data.addData('Score', total_reward);
-                                        jsPsych.data.addData('set_num', set_num);
-                                        jsPsych.data.addData('participant_id', participant_id);
-                                        jsPsych.data.addData('phase', phase);
-                                        jsPsych.data.addData('condition_type', condition.type);
-                                        jsPsych.data.addData('level_num', level_num);
-                                        jsPsych.data.addData('stage', stage);
-                                        jsPsych.data.addData('state', next_state);
-                                        jsPsych.data.addData('action', action_2);
-                                        jsPsych.data.addData('next_state', final_state);
-                                        jsPsych.data.addData('reward', final_reward);
-                                        jsPsych.data.addData('probabilities', probs);
-                                        jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                        jsPsych.data.addData('episode_index', episode_index + 1);
-                                        jsPsych.data.addData('trial', episode_index + 1);
                                         stage += 1;
 
                                         total_reward += final_reward;
@@ -687,213 +655,6 @@
                                 jsPsych.data.addData('Trial', episode_index + 1);
                                 jsPsych.data.addData('Episode', episode_index + 1);
                                 jsPsych.data.addData('Score', total_reward);
-                                jsPsych.data.addData('set_num', set_num);
-                                jsPsych.data.addData('participant_id', participant_id);
-                                jsPsych.data.addData('phase', phase);
-                                jsPsych.data.addData('condition_type', condition.type);
-                                jsPsych.data.addData('level_num', level_num);
-                                jsPsych.data.addData('stage', stage);
-                                jsPsych.data.addData('state', 'A1');
-                                jsPsych.data.addData('action', response);
-                                jsPsych.data.addData('next_state', next_state);
-                                jsPsych.data.addData('reward', 0);
-                                jsPsych.data.addData('probabilities', '');
-                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                jsPsych.data.addData('episode_index', episode_index + 1);
-                                jsPsych.data.addData('trial', episode_index + 1);
-                                stage += 1;
-
-                                // Stage 2: X -> Y
-                                let y_state = {'X1':'Y1','X2':'Y2','X3':'Y3'}[next_state] || 'Y3';
-                                timeline.push(create_shape_trial(next_state, scoreboard_text));
-
-                                let instruction_2 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
-                                timeline.push(create_arrow_response_trial(instruction_2, next_state, scoreboard_text));
-
-                                // Handle second response
-                                timeline.push({
-                                    type: 'call-function',
-                                    func: function(data) {
-                                        let response_2 = data.response;
-                                        if (response_2 === 'Escape') {
-                                            jsPsych.endExperiment("Experiment terminated by user.");
-                                        }
-                                        let action_2 = '';
-                                        if (response_2 === 'ArrowLeft') {
-                                            action_2 = 'left';
-                                        } else if (response_2 === 'ArrowRight') {
-                                            action_2 = 'right';
-                                        }
-
-                                        // Get probabilities for Y state
-                                        let key = `${y_state}_${action_2}`;
-                                        let probs = is_reward_cond ? reward_prob_map[key] : punishment_prob_map[key];
-                                        if (condition.probability_reversal) {
-                                            probs = probs.slice().reverse();
-                                        }
-
-                                        // Final transition
-                                        let final = final_transition(is_reward_cond, probs, reward_value);
-                                        let final_state = final.chosen;
-                                        let final_reward = final.reward;
-
-                                        // Log second transition
-                                        jsPsych.data.addData('Set', set_num);
-                                        jsPsych.data.addData('Participant', participant_id);
-                                        jsPsych.data.addData('Phase', phase);
-                                        jsPsych.data.addData('Condition_Type', condition.type);
-                                        jsPsych.data.addData('Level', level_num);
-                                        jsPsych.data.addData('Stage', stage);
-                                        jsPsych.data.addData('State', next_state);
-                                        jsPsych.data.addData('Action', action_2);
-                                        jsPsych.data.addData('Next_State', y_state);
-                                        jsPsych.data.addData('Reward', 0);
-                                        jsPsych.data.addData('Probabilities', '');
-                                        jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
-                                        jsPsych.data.addData('Trial', episode_index + 1);
-                                        jsPsych.data.addData('Episode', episode_index + 1);
-                                        jsPsych.data.addData('Score', total_reward);
-                                        jsPsych.data.addData('set_num', set_num);
-                                        jsPsych.data.addData('participant_id', participant_id);
-                                        jsPsych.data.addData('phase', phase);
-                                        jsPsych.data.addData('condition_type', condition.type);
-                                        jsPsych.data.addData('level_num', level_num);
-                                        jsPsych.data.addData('stage', stage);
-                                        jsPsych.data.addData('state', next_state);
-                                        jsPsych.data.addData('action', action_2);
-                                        jsPsych.data.addData('next_state', y_state);
-                                        jsPsych.data.addData('reward', 0);
-                                        jsPsych.data.addData('probabilities', '');
-                                        jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                        jsPsych.data.addData('episode_index', episode_index + 1);
-                                        jsPsych.data.addData('trial', episode_index + 1);
-                                        stage += 1;
-
-                                        // Stage 3: Y -> Terminal
-                                        timeline.push(create_shape_trial(y_state, scoreboard_text));
-
-                                        // Instruction for final step
-                                        let instruction_3 = "Press 'left' or 'right' arrow. Press 'esc' to quit.";
-                                        timeline.push(create_arrow_response_trial(instruction_3, y_state, scoreboard_text));
-
-                                        // Handle final response
-                                        timeline.push({
-                                            type: 'call-function',
-                                            func: function(data_final) {
-                                                let response_final = data_final.response;
-                                                if (response_final === 'Escape') {
-                                                    jsPsych.endExperiment("Experiment terminated by user.");
-                                                }
-                                                let action_final = '';
-                                                if (response_final === 'ArrowLeft') {
-                                                    action_final = 'left';
-                                                } else if (response_final === 'ArrowRight') {
-                                                    action_final = 'right';
-                                                }
-
-                                                // Get probabilities for final transition
-                                                let key_final = `${y_state}_${action_final}`;
-                                                let probs_final = is_reward_cond ? reward_prob_map[key_final] : punishment_prob_map[key_final];
-                                                if (condition.probability_reversal) {
-                                                    probs_final = probs_final.slice().reverse();
-                                                }
-
-                                                // Final transition
-                                                let final_final = final_transition(is_reward_cond, probs_final, reward_value);
-                                                let final_final_state = final_final.chosen;
-                                                let final_final_reward = final_final.reward;
-
-                                                // Log final transition
-                                                jsPsych.data.addData('Set', set_num);
-                                                jsPsych.data.addData('Participant', participant_id);
-                                                jsPsych.data.addData('Phase', phase);
-                                                jsPsych.data.addData('Condition_Type', condition.type);
-                                                jsPsych.data.addData('Level', level_num);
-                                                jsPsych.data.addData('Stage', stage);
-                                                jsPsych.data.addData('State', y_state);
-                                                jsPsych.data.addData('Action', action_final);
-                                                jsPsych.data.addData('Next_State', final_final_state);
-                                                jsPsych.data.addData('Reward', final_final_reward);
-                                                jsPsych.data.addData('Probabilities', probs_final);
-                                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
-                                                jsPsych.data.addData('Trial', episode_index + 1);
-                                                jsPsych.data.addData('Episode', episode_index + 1);
-                                                jsPsych.data.addData('Score', total_reward);
-                                                jsPsych.data.addData('set_num', set_num);
-                                                jsPsych.data.addData('participant_id', participant_id);
-                                                jsPsych.data.addData('phase', phase);
-                                                jsPsych.data.addData('condition_type', condition.type);
-                                                jsPsych.data.addData('level_num', level_num);
-                                                jsPsych.data.addData('stage', stage);
-                                                jsPsych.data.addData('state', y_state);
-                                                jsPsych.data.addData('action', action_final);
-                                                jsPsych.data.addData('next_state', final_final_state);
-                                                jsPsych.data.addData('reward', final_final_reward);
-                                                jsPsych.data.addData('probabilities', probs_final);
-                                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                                jsPsych.data.addData('episode_index', episode_index + 1);
-                                                jsPsych.data.addData('trial', episode_index + 1);
-                                                stage += 1;
-
-                                                total_reward += final_final_reward;
-
-                                                // Display final reward message if terminal state
-                                                if (['R1', 'R2', 'P1', 'P2'].includes(final_final_state)) {
-                                                    let final_reward_message = `You received a reward of ${final_final_reward} points!\nTotal Reward: ${total_reward}`;
-                                                    timeline.push(create_message_trial(final_reward_message, 2));
-
-                                                    // Add terminal state shape
-                                                    timeline.push(create_shape_trial(final_final_state, `Total Reward: ${total_reward}`));
-                                                }
-                                            }
-                                        });
-                                    }
-                                });
-
-                            } else if (phase === 3) {
-                                // Three-step transitions (A1 -> X -> Y -> Terminal)
-                                // Stage 1: A1 -> X
-                                let next_state = '';
-                                if (response === '1') {
-                                    next_state = 'X1';
-                                } else if (response === '2') {
-                                    next_state = 'X2';
-                                } else if (response === '3') {
-                                    next_state = 'X3';
-                                } else {
-                                    next_state = 'X3'; // Default
-                                }
-
-                                // Log first transition
-                                jsPsych.data.addData('Set', set_num);
-                                jsPsych.data.addData('Participant', participant_id);
-                                jsPsych.data.addData('Phase', phase);
-                                jsPsych.data.addData('Condition_Type', condition.type);
-                                jsPsych.data.addData('Level', level_num);
-                                jsPsych.data.addData('Stage', stage);
-                                jsPsych.data.addData('State', 'A1');
-                                jsPsych.data.addData('Action', response);
-                                jsPsych.data.addData('Next_State', next_state);
-                                jsPsych.data.addData('Reward', 0);
-                                jsPsych.data.addData('Probabilities', '');
-                                jsPsych.data.addData('Probability_Reversal', condition.probability_reversal);
-                                jsPsych.data.addData('Trial', episode_index + 1);
-                                jsPsych.data.addData('Episode', episode_index + 1);
-                                jsPsych.data.addData('Score', total_reward);
-                                jsPsych.data.addData('set_num', set_num);
-                                jsPsych.data.addData('participant_id', participant_id);
-                                jsPsych.data.addData('phase', phase);
-                                jsPsych.data.addData('condition_type', condition.type);
-                                jsPsych.data.addData('level_num', level_num);
-                                jsPsych.data.addData('stage', stage);
-                                jsPsych.data.addData('state', 'A1');
-                                jsPsych.data.addData('action', response);
-                                jsPsych.data.addData('next_state', next_state);
-                                jsPsych.data.addData('reward', 0);
-                                jsPsych.data.addData('probabilities', '');
-                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                jsPsych.data.addData('episode_index', episode_index + 1);
-                                jsPsych.data.addData('trial', episode_index + 1);
                                 stage += 1;
 
                                 // Stage 2: X -> Y
@@ -946,20 +707,6 @@
                                         jsPsych.data.addData('Trial', episode_index + 1);
                                         jsPsych.data.addData('Episode', episode_index + 1);
                                         jsPsych.data.addData('Score', total_reward);
-                                        jsPsych.data.addData('set_num', set_num);
-                                        jsPsych.data.addData('participant_id', participant_id);
-                                        jsPsych.data.addData('phase', phase);
-                                        jsPsych.data.addData('condition_type', condition.type);
-                                        jsPsych.data.addData('level_num', level_num);
-                                        jsPsych.data.addData('stage', stage);
-                                        jsPsych.data.addData('state', next_state);
-                                        jsPsych.data.addData('action', action_2);
-                                        jsPsych.data.addData('next_state', y_state);
-                                        jsPsych.data.addData('reward', 0);
-                                        jsPsych.data.addData('probabilities', '');
-                                        jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                        jsPsych.data.addData('episode_index', episode_index + 1);
-                                        jsPsych.data.addData('trial', episode_index + 1);
                                         stage += 1;
 
                                         // Stage 3: Y -> Terminal
@@ -1012,20 +759,6 @@
                                                 jsPsych.data.addData('Trial', episode_index + 1);
                                                 jsPsych.data.addData('Episode', episode_index + 1);
                                                 jsPsych.data.addData('Score', total_reward);
-                                                jsPsych.data.addData('set_num', set_num);
-                                                jsPsych.data.addData('participant_id', participant_id);
-                                                jsPsych.data.addData('phase', phase);
-                                                jsPsych.data.addData('condition_type', condition.type);
-                                                jsPsych.data.addData('level_num', level_num);
-                                                jsPsych.data.addData('stage', stage);
-                                                jsPsych.data.addData('state', y_state);
-                                                jsPsych.data.addData('action', action_final);
-                                                jsPsych.data.addData('next_state', final_final_state);
-                                                jsPsych.data.addData('reward', final_final_reward);
-                                                jsPsych.data.addData('probabilities', probs_final);
-                                                jsPsych.data.addData('probability_reversal', condition.probability_reversal);
-                                                jsPsych.data.addData('episode_index', episode_index + 1);
-                                                jsPsych.data.addData('trial', episode_index + 1);
                                                 stage += 1;
 
                                                 total_reward += final_final_reward;
@@ -1131,7 +864,7 @@
                     }
                 }
 
-                // Save data for the set
+                // Save data for the set locally (optional)
                 timeline.push({
                     type: 'call-function',
                     func: function(){
@@ -1145,12 +878,12 @@
             const postExp_trial = {
                 type: 'survey-html-form',
                 html: postExp_questions.map(q => {
-                    if (q.type === 'likert') {
+                    if (q.labels) { // Assuming likert type
                         return `<p>${q.prompt}</p>
                                 <label>
                                     ${q.labels.map(label => `<input type="radio" name="${q.name}" value="${label}"> ${label}<br>`).join('')}
                                 </label>`;
-                    } else if (q.type === 'text') {
+                    } else { // Text type
                         return `<p>${q.prompt}</p>
                                 <textarea name="${q.name}" rows="5" cols="60" placeholder="${q.placeholder || ''}"></textarea>`;
                     }
@@ -1159,6 +892,36 @@
             };
             timeline.push(postExp_trial);
             timeline.push(create_message_trial("Finished Post-Experiment Survey!\nPress any key to complete the experiment.", null));
+
+            // (5) Send Data to Sheet.best
+            const send_data = {
+                type: 'http-request',
+                url: 'https://api.sheetbest.com/sheets/f1709b83-4e56-478f-9c38-5467bb3b862c', // Your Sheet.best API endpoint
+                method: 'POST',
+                data: function() {
+                    return jsPsych.data.get().json(); // Sends all collected data in JSON format
+                },
+                on_finish: function(response) {
+                    if(response.status === 200){
+                        console.log('Data sent successfully:', response);
+                    } else {
+                        alert('There was an issue submitting your data. Please contact the researcher.');
+                        console.error('Data submission failed:', response);
+                    }
+                }
+            };
+            timeline.push(send_data);
+
+            // (6) Thank You Message
+            const thank_you = {
+                type: 'html-keyboard-response',
+                stimulus: `
+                    <p>Thank you for participating!</p>
+                    <p>Your responses have been recorded.</p>
+                `,
+                choices: ['None']
+            };
+            timeline.push(thank_you);
 
             // Run the experiment
             jsPsych.run(timeline);
